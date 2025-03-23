@@ -34,6 +34,7 @@ if (hasPermission('admin')) {
         FROM cases c 
         JOIN students s ON c.student_id = s.id 
         JOIN users u ON c.reported_by = u.id 
+        WHERE c.status != 'reviewed'
         ORDER BY c.created_at DESC 
         LIMIT 5
     ");
@@ -43,7 +44,7 @@ if (hasPermission('admin')) {
         SELECT c.*, s.full_name as student_name 
         FROM cases c 
         JOIN students s ON c.student_id = s.id 
-        WHERE c.reported_by = ? 
+        WHERE c.reported_by = ? AND c.status != 'reviewed'
         ORDER BY c.created_at DESC 
         LIMIT 5
     ");

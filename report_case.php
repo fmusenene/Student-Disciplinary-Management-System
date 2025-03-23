@@ -202,8 +202,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     <div class="mb-3">
                         <label for="evidence" class="form-label">Evidence (Optional)</label>
-                        <input type="file" class="form-control" id="evidence" name="evidence">
-                        <div class="form-text">Supported formats: PDF, DOC, DOCX, JPG, PNG</div>
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- File Upload -->
+                                <div class="mb-3">
+                                    <label for="evidence" class="form-label">Upload File</label>
+                                    <input type="file" class="form-control" id="evidence" name="evidence" accept="image/*,video/*">
+                                    <div class="form-text">Supported formats: PDF, DOC, DOCX, JPG, PNG, MP4, MOV, AVI</div>
+                                </div>
+
+                                <!-- Camera Capture -->
+                                <div class="mb-3">
+                                    <label class="form-label">Capture Photo/Video</label>
+                                    <div class="d-flex gap-2 mb-2">
+                                        <button type="button" class="btn btn-primary" id="startCamera">
+                                            <i class="bi bi-camera"></i> Start Camera
+                                        </button>
+                                        <button type="button" class="btn btn-danger d-none" id="stopCamera">
+                                            <i class="bi bi-camera-video-off"></i> Stop Camera
+                                        </button>
+                                    </div>
+                                    <div class="position-relative">
+                                        <video id="camera" class="d-none" autoplay playsinline style="max-width: 100%;"></video>
+                                        <canvas id="canvas" class="d-none"></canvas>
+                                        <div class="d-flex gap-2 mt-2">
+                                            <button type="button" class="btn btn-success d-none" id="capturePhoto">
+                                                <i class="bi bi-camera"></i> Capture Photo
+                                            </button>
+                                            <button type="button" class="btn btn-danger d-none" id="startRecording">
+                                                <i class="bi bi-record-circle"></i> Start Recording
+                                            </button>
+                                            <button type="button" class="btn btn-danger d-none" id="stopRecording">
+                                                <i class="bi bi-stop-circle"></i> Stop Recording
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="preview" class="mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <hr>
@@ -234,4 +271,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<?php require_once 'includes/footer.php'; ?> 
+<?php require_once 'includes/footer.php'; ?>
+
+<script>
+let stream = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+
+// Start Camera
+document.getElementById('startCamera').addEventListener('click', async () => {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const video = document.getElementById('camera');
+        video.srcObject = stream;
+        video.classList.remove('d-none');
+        
+        document.getElementById('startCamera').classList.add('d-none');
+        document.getElementById('stopCamera').classList.remove('d-none');
+        document.getElementById('capturePhoto').classList.remove('d-none');
+        document.getElementById('startRecording').classList.remove('d-none');
+    } catch (err) {
+        console.error('Error accessing camera:', err);
+        alert('Error accessing camera. Please make sure you have granted camera permissions.');
+    }
+});
+
+// Stop Camera
+document.getElementById('stopCamera').addEventListener('click', () => {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        document.getElementById('camera').classList.add('d-none');
+        document.getElementById('startCamera').classList.remove('d-none');
+        document.getElementById('stopCamera').classList.add('d-none');
+        document.getElementById('capturePhoto').classList.add('d-none');
+        document.getElementById('startRecording').classList.add('d-none');
+        document.getElementById('stopRecording').classList.add('d-none');
+    }
+});
+
+// Capture Photo
+document.getElementById('capturePhoto').addEventListener('click', () => {
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('preview');
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    
+    const img = document.createElement('img');
+    img.src = canvas.toDataURL('image/jpeg');
+    img.className = 'img-fluid mb-2';
+    
+    preview.innerHTML = '';
+    preview.appendChild(img);
+});
+
+// Start Recording
+document.getElementById('startRecording').addEventListener('click', () => {
+    recordedChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    
+    mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+            recordedChunks.push(e.data);
+        }
+    };
+    
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(blob);
+        video.className = 'img-fluid mb-2';
+        video.controls = true;
+        
+        const preview = document.getElementById('preview');
+        preview.innerHTML = '';
+        preview.appendChild(video);
+    };
+    
+    mediaRecorder.start();
+    document.getElementById('startRecording').classList.add('d-none');
+    document.getElementById('stopRecording').classList.remove('d-none');
+});
+
+// Stop Recording
+document.getElementById('stopRecording').addEventListener('click', () => {
+    mediaRecorder.stop();
+    document.getElementById('startRecording').classList.remove('d-none');
+    document.getElementById('stopRecording').classList.add('d-none');
+});
+</script> 

@@ -94,6 +94,13 @@ requireLogin();
                         </a>
                     </li>
                     <?php endif; ?>
+                    <?php if (hasPermission('parent')): ?>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'parent_cases.php' ? 'active' : ''; ?>" href="parent_cases.php">
+                            <i class="bi bi-person-lines-fill"></i> My Children's Cases
+                        </a>
+                    </li>
+                    <?php endif; ?>
                 </ul>
             </div>
             
