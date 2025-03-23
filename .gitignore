@@ -1,0 +1,36 @@
+# IDE and Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# PHP files
+*.log
+*.cache
+vendor/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Database files
+*.sql
+*.sqlite
+
+# Temporary files
+*.tmp
+*.temp 
