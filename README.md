@@ -84,9 +84,4 @@ mysql -u root disciplinary_system < database/schema.sql
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-CREATE DATABASE disciplinary_system;
-exit; 
-
-ALTER TABLE users ADD COLUMN phone VARCHAR(20) UNIQUE AFTER email; 
+This project is licensed under the MIT License - see the LICENSE file for details. 
